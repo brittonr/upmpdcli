@@ -3,6 +3,8 @@
   stdenv,
   fetchurl,
   pkg-config,
+  meson,
+  ninja,
   expat,
   curl,
   libnpupnp,
@@ -14,10 +16,14 @@ stdenv.mkDerivation rec {
 
   src = fetchurl {
     url = "https://www.lesbonscomptes.com/upmpdcli/downloads/${pname}-${version}.tar.gz";
-    hash = "sha256-0lx8z6hqpcc5bpqd787kgwkagb4kk2c5igjnys4v5bsv4x6p7sl9";
+    hash = "sha256-07IBYZqEg3J53Ebut8yqp5YNQ3LbEbQ88rFDtdm9Mi4=";
   };
 
-  nativeBuildInputs = [ pkg-config ];
+  nativeBuildInputs = [
+    pkg-config
+    meson
+    ninja
+  ];
   buildInputs = [
     expat
     curl

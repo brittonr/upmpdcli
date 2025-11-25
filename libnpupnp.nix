@@ -3,8 +3,11 @@
   stdenv,
   fetchurl,
   pkg-config,
+  meson,
+  ninja,
   expat,
   curl,
+  libmicrohttpd,
 }:
 
 stdenv.mkDerivation rec {
@@ -13,13 +16,18 @@ stdenv.mkDerivation rec {
 
   src = fetchurl {
     url = "https://www.lesbonscomptes.com/upmpdcli/downloads/${pname}-${version}.tar.gz";
-    hash = "sha256-1s8jjwjm5jk1call5qjvcc4w1a0kfmdacxm81db8b5vqx2h3sxkw";
+    hash = "sha256-Vj0qnkr+YDcXND3EZnwLicagFwCKxrUiYtoXoeT2u5Y=";
   };
 
-  nativeBuildInputs = [ pkg-config ];
+  nativeBuildInputs = [
+    pkg-config
+    meson
+    ninja
+  ];
   buildInputs = [
     expat
     curl
+    libmicrohttpd
   ];
 
   meta = with lib; {

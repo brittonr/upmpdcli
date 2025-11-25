@@ -29,12 +29,15 @@
 
           src = pkgs.fetchurl {
             url = "https://www.lesbonscomptes.com/upmpdcli/downloads/${pname}-${version}.tar.gz";
-            hash = "sha256-06z6fyjq5g1g1gq9zj9klwl87zmn0pnricrihhf3hjvr2pakjgmi";
+            hash = "sha256-exDMNcrpN3xUKro5g9/TnjS03V//ZFEvVP64fmTPhgk=";
           };
 
           nativeBuildInputs = with pkgs; [
             pkg-config
             pythonEnv
+            makeWrapper
+            meson
+            ninja
           ];
 
           buildInputs = with pkgs; [
@@ -46,13 +49,24 @@
             pythonEnv
           ];
 
+          # Prevent installation to /etc which fails in sandboxed builds
+          postPatch = ''
+            # Modify the meson.build to install config to share/upmpdcli instead of /etc
+            substituteInPlace meson.build \
+              --replace-fail "install_dir: '/etc'" "install_dir: get_option('datadir') / 'upmpdcli'"
+
+            # Disable the install script that tries to write to /etc
+            substituteInPlace meson.build \
+              --replace-fail "meson.add_install_script('tools/installconfig.sh')" "# meson.add_install_script disabled"
+          '';
+
           # Ensure plugins can find Python modules
           postInstall = ''
-            # Wrap Python plugin scripts
+            # Wrap Python plugin scripts (only executable ones)
             for plugin in $out/share/upmpdcli/cdplugins/*; do
               if [ -d "$plugin" ]; then
                 for script in "$plugin"/*.py; do
-                  if [ -f "$script" ]; then
+                  if [ -f "$script" ] && [ -x "$script" ]; then
                     wrapProgram "$script" \
                       --prefix PYTHONPATH : ${pythonEnv}/${pkgs.python3.sitePackages}
                   fi
